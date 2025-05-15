@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>팀 프로젝트 평가</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        h1, h2 {
+            text-align: center;
+            color: #333;
+        }
+        .section {
+            margin-bottom: 40px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+        }
+        .team-section {
+            margin-bottom: 40px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+        }
+        .criteria-section {
+            margin-bottom: 25px;
+        }
+        .criteria-section h3 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        .rating-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .rating-option {
+            display: flex;
+            align-items: center;
+            margin-right: 15px;
+        }
+        .rating-option input {
+            margin-right: 5px;
+        }
+        .subcriteria {
+            margin-left: 20px;
+            margin-bottom: 15px;
+        }
+        .submit-btn, .admin-btn {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            display: block;
+            margin: 30px auto;
+            transition: background-color 0.3s;
+        }
+        .submit-btn:hover, .admin-btn:hover {
+            background-color: #2980b9;
+        }
+        .evaluator-info {
+            margin-bottom: 30px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #f0f8ff;
+        }
+        .hidden {
+            display: none;
+        }
+        .admin-section {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 40px;
+            border: 2px solid #e9ecef;
+        }
+        .admin-password {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .admin-password input {
+            padding: 8px;
+            width: 200px;
+            margin-right: 10px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background-color: #f2f2f2;
+            position: sticky;
+            top: 0;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .tab-buttons {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .tab-btn {
+            padding: 10px 20px;
+            margin: 0 5px;
+            background-color: #e9ecef;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .tab-btn.active {
+            background-color: #3498db;
+            color: white;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .success-message {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .chart-container {
+            width: 100%;
+            height: 400px;
+            margin: 20px 0;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <h1>팀 프로젝트 평가 시스템</h1>
+    
+    <div class="tab-buttons">
+        <button class="tab-btn active" onclick="showTab('evaluation-tab')">팀 평가</button>
+        <button class="tab-btn" onclick="showTab('admin-tab')">관리자 페이지</button>
+    </div>
+    
+    <!-- 평가 탭 -->
+    <div id="evaluation-tab" class="tab-content active">
+        <div id="success-message" class="success-message hidden">
+            평가가 성공적으로 제출되었습니다! 다른 팀도 평가하시겠습니까?
+        </div>
+        
+        <form name="team-evaluation" id="evaluation-form" method="POST" data-netlify="true">
+            <!-- 숨겨진 Netlify 폼 필드 -->
+            <input type="hidden" name="form-name" value="team-evaluation">
+            
+            <div class="evaluator-info">
+                <h2>평가자 정보</h2>
+                <div>
+                    <label for="evaluator-team">본인 팀 번호:</label>
+                    <select name="evaluator-team" id="evaluator-team" required>
+                        <option value="">선택하세요</option>
+                        <option value="1">1팀</option>
+                        <option value="2">2팀</option>
+                        <option value="3">3팀</option>
+                        <option value="4">4팀</option>
+                        <option value="5">5팀</option>
+                        <option value="6">6팀</option>
+                        <option value="7">7팀</option>
+                        <option value="8">8팀</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>평가할 팀 선택</h2>
+                <div>
+                    <label for="evaluated-team">평가할 팀 번호:</label>
+                    <select name="evaluated-team" id="evaluated-team" required>
+                        <option value="">선택하세요</option>
+                        <option value="1">1팀</option>
+                        <option value="2">2팀</option>
+                        <option value="3">3팀</option>
+                        <option value="4">4팀</option>
+                        <option value="5">5팀</option>
+                        <option value="6">6팀</option>
+                        <option value="7">7팀</option>
+                        <option value="8">8팀</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="team-section" id="evaluation-section">
+                <h2>팀 평가</h2>
+                
+                <!-- 1. 문제 정의 (30점) -->
+                <div class="criteria-section">
+                    <h3>1. 문제 정의 (30점)</h3>
+                    
+                    <div class="subcriteria">
+                        <p>1-1. 주변 사람들이 실제 겪는 구체적인 문제인가? (10점)</p>
+                        <div class="rating-group">
+                            <label class="rating-option"><input type="radio" name="problem-reality" value="2" required> 2점</label>
+                            <label class="rating-option"><input type="radio" name="problem-reality" value="4"> 4점</label>
+                            <label class="rating-option"><input type="radio" name="problem-reality" value="6"> 6점</label>
+                            <label class="rating-option"><input type="radio" name="problem-reality" value="8"> 8점</label>
+                            <label class="rating-option"><input type="radio" name="problem-reality" value="10"> 10점</label>
+                        </div>
+                    </div>
+                    
+                    <div class="subcriteria">
+                        <p>1-2. 문제 해결 방식이 새롭고 창의적인가? (10점)</p>
+                        <div class="rating-group">
+                            <label class="rating-option"><input type="radio" name="problem-creativity" value="2" required> 2점</label>
+                            <label class="rating-option"><input type="radio" name="problem-creativity" value="4"> 4점</label>
+                            <label class="rating-option"><input type="radio" name="problem-creativity" value="6"> 6점</label>
+                            <label class="rating-option"><input type="radio" name="problem-creativity" value="8"> 8점</label>
+                            <label class="rating-option"><input type="radio" name="problem-creativity" value="10"> 10점</label>
+                        </div>
+                    </div>
+                    
+                    <div class="subcriteria">
+                        <p>1-3. 문제와 연결된 타겟이 명확하고 현실적인가? (10점)</p>
+                        <div class="rating-group">
+                            <label class="rating-option"><input type="radio" name="problem-target" value="2" required> 2점</label>
+                            <label class="rating-option"><input type="radio" name="problem-target" value="4"> 4점</label>
+                            <label class="rating-option"><input type="radio" name="problem-target" value="6"> 6점</label>
+                            <label class="rating-option"><input type="radio" name="problem-target" value="8"> 8점</label>
+                            <label class="rating-option"><input type="radio" name="problem-target" value="10"> 10점</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 2. AI 혁신성 (20점) -->
+                <div class="criteria-section">
+                    <h3>2. AI 혁신성 (20점)</h3>
+                    
+                    <div class="subcriteria">
+                        <p>2-1. AI 기술이 문제 해결의 핵심 역할을 하고 있는가? (10점)</p>
+                        <div class="rating-group">
+                            <label class="rating-option"><input type="radio" name="ai-core" value="2" required> 2점</label>
+                            <label class="rating-option"><input type="radio" name="ai-core" value="4"> 4점</label>
+                            <label class="rating-option"><input type="radio" name="ai-core" value="6"> 6점</label>
+                            <label class="rating-option"><input type="radio" name="ai-core" value="8"> 8점</label>
+                            <label class="rating-option"><input type="radio" name="ai-core" value="10"> 10점</label>
+                        </div>
+                    </div>
+                    
+                    <div class="subcriteria">
+                        <p>2-2. AI 적용 방식이 창의적이고, 현실적 제약을 고려했는가? (10점)</p>
+                        <div class="rating-group">
+                            <label class="rating-option"><input type="radio" name="ai-creativity" value="2" required> 2점</label>
+                            <label class="rating-option"><input type="radio" name="ai-creativity" value="4"> 4점</label>
+                            <label class="rating-option"><input type="radio" name="ai-creativity" value="6"> 6점</label>
+                            <label class="rating-option"><input type="radio" name="ai-creativity" value="8"> 8점</label>
+                            <label class="rating-option"><input type="radio" name="ai-creativity" value="10"> 10점</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 3. 실현 가능성 (30점) -->
+                <div class="criteria-section">
+                    <h3>3. 실현 가능성 (30점)</h3>
+                    
+                    <div class="subcriteria">
+                        <p>3-1. 실질적인 실행 계획(로드맵)을 제시했는가? (10점)</p>
+                        <div class="rating-group">
+                            <label class="rating-option"><input type="radio" name="feasibility-roadmap" value="2" required> 2점</label>
+                            <label class="rating-option"><input type="radio" name="feasibility-roadmap" value="4"> 4점</label>
+                            <label class="rating-option"><input type="radio" name="feasibility-roadmap" value="6"> 6점</label>
+                            <label class="rating-option"><input type="radio" name="feasibility-roadmap" value="8"> 8점</label>
+                            <label class="rating-option"><input type="radio" name="feasibility-roadmap" value="10"> 10점</label>
+                        </div>
+                    </div>
+                    
+                    <div class="subcriteria">
+                        <p>3-2. 수익 모델이 명확하며, 서비스가 지속 가능한가? (10점)</p>
+                        <div class="rating-group">
+                            <label class="rating-option"><input type="radio" name="feasibility-revenue" value="2" required> 2점</label>
+                            <label class="rating-option"><input type="radio" name="feasibility-revenue" value="4"> 4점</label>
+                            <label class="rating-option"><input type="radio" name="feasibility-revenue" value="6"> 6점</label>
+                            <label class="rating-option"><input type="radio" name="feasibility-revenue" value="8"> 8점</label>
+                            <label class="rating-option"><input type="radio" name="feasibility-revenue" value="10"> 10점</label>
+                        </div>
+                    </div>
+                    
+                    <div class="subcriteria">
+                        <p>3-3. UI/UX가 타겟 사용자에 맞춰 직관적이고 접근성이 좋은가? (5점)</p>
+                        <div class="rating-group">
+                            <label class="rating-option"><input type="radio" name="feasibility-uiux" value="1" required> 1점</label>
+                            <label class="rating-option"><input type="radio" name="feasibility-uiux" value="2"> 2점</label>
+                            <label class="rating-option"><input type="radio" name="feasibility-uiux" value="3"> 3점</label>
+                            <label class="rating-option"><input type="radio" name="feasibility-uiux" value="4"> 4점</label>
+                            <label class="rating-option"><input type="radio" name="feasibility-uiux" value="5"> 5점</label>
+                        </div>
+                    </div>
+                    
+                    <div class="subcriteria">
+                        <p>3-4. 제시된 프로토타입이 실제로 동작할 수 있는 수준인가? (5점)</p>
+                        <div class="rating-group">
+                            <label class="rating-option"><input type="radio" name="feasibility-prototype" value="1" required> 1점</label>
+                            <label class="rating-option"><input type="radio" name="feasibility-prototype" value="2"> 2점</label>
+                            <label class="rating-option"><input type="radio" name="feasibility-prototype" value="3"> 3점</label>
+                            <label class="rating-option"><input type="radio" name="feasibility-prototype" value="4"> 4점</label>
+                            <label class="rating-option"><input type="radio" name="feasibility-prototype" value="5"> 5점</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 4. 전달력 (20점) -->
+                <div class="criteria-section">
+                    <h3>4. 전달력 (20점)</h3>
+                    
+                    <div class="subcriteria">
+                        <p>4-1. 발표자료가 주제와 문제를 명확히 설명하는가? (10점)</p>
+                        <div class="rating-group">
+                            <label class="rating-option"><input type="radio" name="delivery-clarity" value="2" required> 2점</label>
+                            <label class="rating-option"><input type="radio" name="delivery-clarity" value="4"> 4점</label>
+                            <label class="rating-option"><input type="radio" name="delivery-clarity" value="6"> 6점</label>
+                            <label class="rating-option"><input type="radio" name="delivery-clarity" value="8"> 8점</label>
+                            <label class="rating-option"><input type="radio" name="delivery-clarity" value="10"> 10점</label>
+                        </div>
+                    </div>
+                    
+                    <div class="subcriteria">
+                        <p>4-2. 발표가 청중에게 몰입감과 공감을 주는가? (10점)</p>
+                        <div class="rating-group">
+                            <label class="rating-option"><input type="radio" name="delivery-engagement" value="2" required> 2점</label>
+                            <label class="rating-option"><input type="radio" name="delivery-engagement" value="4"> 4점</label>
+                            <label class="rating-option"><input type="radio" name="delivery-engagement" value="6"> 6점</label>
+                            <label class="rating-option"><input type="radio" name="delivery-engagement" value="8"> 8점</label>
+                            <label class="rating-option"><input type="radio" name="delivery-engagement" value="10"> 10점</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="submit-btn">평가 제출하기</button>
+        </form>
+    </div>
+    
+    <!-- 관리자 탭 -->
+    <div id="admin-tab" class="tab-content">
+        <div class="admin-section">
+            <h2>관리자 페이지</h2>
+            
+            <div class="admin-password">
+                <input type="password" id="admin-password" placeholder="관리자 비밀번호 입력">
+                <button class="admin-btn" onclick="checkAdminPassword()">접속</button>
+            </div>
+            
+            <div id="admin-content" class="hidden">
+                <div class="tab-buttons">
+                    <button class="tab-btn active" onclick="showAdminTab('summary-tab')">팀별 요약</button>
+                    <button class="tab-btn" onclick="showAdminTab('details-tab')">상세 평가</button>
+                    <button class="tab-btn" onclick="showAdminTab('charts-tab')">차트 보기</button>
+                </div>
+                
+                <!-- 요약 탭 -->
+                <div id="summary-tab" class="tab-content active">
+                    <h3>팀별 평균 점수</h3>
+                    <table id="summary-table">
+                        <thead>
+                            <tr>
+                                <th>팀</th>
+                                <th>총점 (100점)</th>
+                                <th>문제 정의 (30점)</th>
+                                <th>AI 혁신성 (20점)</th>
+                                <th>실현 가능성 (30점)</th>
+                                <th>전달력 (20점)</th>
+                                <th>평가자 수</th>
+                            </tr>
+                        </thead>
+                        <tbody id="summary-table-body">
+                            <!-- 자바스크립트로 채워짐 -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- 상세 탭 -->
+                <div id="details-tab" class="tab-content">
+                    <h3>상세 평가 내역</h3>
+                    <div>
+                        <label for="filter-team">팀 필터링:</label>
+                        <select id="filter-team" onchange="filterEvaluations()">
+                            <option value="all">모든 팀</option>
+                            <option value="1">1팀</option>
+                            <option value="2">2팀</option>
+                            <option value="3">3팀</option>
+                            <option value="4">4팀</option>
+                            <option value="5">5팀</option>
+                            <option value="6">6팀</option>
+                            <option value="7">7팀</option>
+                            <option value="8">8팀</option>
+                        </select>
+                    </div>
+                    <table id="details-table">
+                        <thead>
+                            <tr>
+                                <th>평가 시간</th>
+                                <th>평가자 팀</th>
+                                <th>평가 대상 팀</th>
+                                <th>총점</th>
+                                <th>문제 정의</th>
+                                <th>AI 혁신성</th>
+                                <th>실현 가능성</th>
+                                <th>전달력</th>
+                            </tr>
+                        </thead>
+                        <tbody id="details-table-body">
+                            <!-- 자바스크립트로 채워짐 -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- 차트 탭 -->
+                <div id="charts-tab" class="tab-content">
+                    <h3>팀별 점수 차트</h3>
+                    <div class="chart-container">
+                        <canvas id="total-score-chart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="category-score-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 관리자 비밀번호
+        const ADMIN_PASSWORD = "admin1234";
+        
+        // 평가 데이터 저장소
+        let evaluations = [];
+        
+        // 페이지 로드 시 로컬 스토리지에서 데이터 로드
+        document.addEventListener('DOMContentLoaded', function() {
+            loadEvaluations();
+            setupFormHandling();
+            
+            // 본인 팀 선택 시 해당 팀 평가 불가능하게 설정
+            document.getElementById('evaluator-team').addEventListener('change', function() {
+                const evaluatorTeam = this.value;
+                const evaluatedTeamSelect = document.getElementById('evaluated-team');
+                
+                // 모든 옵션 활성화
+                for (let i = 0; i < evaluatedTeamSelect.options.length; i++) {
+                    evaluatedTeamSelect.options[i].disabled = false;
+                }
+                
+                // 본인 팀 옵션 비활성화
+                if (evaluatorTeam) {
+                    for (let i = 0; i < evaluatedTeamSelect.options.length; i++) {
+                        if (evaluatedTeamSelect.options[i].value === evaluatorTeam) {
+                            evaluatedTeamSelect.options[i].disabled = true;
+                            
+                            // 만약 현재 선택된 팀이 본인 팀이면 선택 초기화
+                            if (evaluatedTeamSelect.value === evaluatorTeam) {
+                                evaluatedTeamSelect.value = "";
+                            }
+                            break;
+                        }
+                    }
+                }
+            });
+        });
+        
+        // 폼 제출 처리 설정
+        function setupFormHandling() {
+            const form = document.getElementById('evaluation-form');
+            
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // 폼 데이터 수집
+                const formData = new FormData(form);
+                const evaluationData = {
+                    timestamp: new Date().toISOString(),
+                    evaluatorTeam: formData.get('evaluator-team'),
+                    evaluatedTeam: formData.get('evaluated-team'),
+                    scores: {
+                        problemReality: parseInt(formData.get('problem-reality')),
+                        problemCreativity: parseInt(formData.get('problem-creativity')),
+                        problemTarget: parseInt(formData.get('problem-target')),
+                        aiCore: parseInt(formData.get('ai-core')),
+                        aiCreativity: parseInt(formData.get('ai-creativity')),
+                        feasibilityRoadmap: parseInt(formData.get('feasibility-roadmap')),
+                        feasibilityRevenue: parseInt(formData.get('feasibility-revenue')),
+                        feasibilityUiux: parseInt(formData.get('feasibility-uiux')),
+                        feasibilityPrototype: parseInt(formData.get('feasibility-prototype')),
+                        deliveryClarity: parseInt(formData.get('delivery-clarity')),
+                        deliveryEngagement: parseInt(formData.get('delivery-engagement'))
+                    }
+                };
+                
+                // 카테고리별 점수 계산
+                evaluationData.categoryScores = {
+                    problem: evaluationData.scores.problemReality + 
+                             evaluationData.scores.problemCreativity + 
+                             evaluationData.scores.problemTarget,
+                    ai: evaluationData.scores.aiCore + 
+                        evaluationData.scores.aiCreativity,
+                    feasibility: evaluationData.scores.feasibilityRoadmap + 
+                                evaluationData.scores.feasibilityRevenue + 
+                                evaluationData.scores.feasibilityUiux + 
+                                evaluationData.scores.feasibilityPrototype,
+                    delivery: evaluationData.scores.deliveryClarity + 
+                             evaluationData.scores.deliveryEngagement
+                };
+                
+                // 총점 계산
+                evaluationData.totalScore = 
+                    evaluationData.categoryScores.problem + 
+                    evaluationData.categoryScores.ai + 
+                    evaluationData.categoryScores.feasibility + 
+                    evaluationData.categoryScores.delivery;
+                
+                // 데이터 저장
+                saveEvaluation(evaluationData);
+                
+                // Netlify Forms에 제출 (실제 서버 제출)
+                fetch('/', {
+                    method: 'POST',
+                    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                    body: new URLSearchParams(formData).toString()
+                })
+                .then(() => {
+                    console.log('Form successfully submitted to Netlify');
+                })
+                .catch((error) => console.error('Error submitting form to Netlify:', error));
+                
+                // 폼 초기화 및 성공 메시지 표시
+                form.reset();
+                document.getElementById('success-message').classList.remove('hidden');
+                setTimeout(() => {
+                    document.getElementById('success-message').classList.add('hidden');
+                }, 5000);
+            });
+        }
+        
+        // 평가 데이터 저장
+        function saveEvaluation(evaluation) {
+            evaluations.push(evaluation);
+            localStorage.setItem('team-evaluations', JSON.stringify(evaluations));
+        }
+        
+        // 평가 데이터 로드
+        function loadEvaluations() {
+            const storedData = localStorage.getItem('team-evaluations');
+            if (storedData) {
+                evaluations = JSON.parse(storedData);
+            }
+        }
+        
+        // 탭 전환 함수
+        function showTab(tabId) {
+            // 모든 탭 비활성화
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // 모든 탭 버튼 비활성화
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // 선택한 탭 활성화
+            document.getElementById(tabId).classList.add('active');
+            
+            // 선택한 탭 버튼 활성화
+            event.target.classList.add('active');
+        }
+        
+        // 관리자 탭 전환 함수
+        function showAdminTab(tabId) {
+            // 모든 관리자 탭 비활성화
+            document.querySelectorAll('#admin-content .tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // 모든 관리자 탭 버튼 비활성화
+            document.querySelectorAll('#admin-content .tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // 선택한 탭 활성화
+            document.getElementById(tabId).classList.add('active');
+            
+            // 선택한 탭 버튼 활성화
+            event.target.classList.add('active');
+            
+            // 차트 탭이면 차트 렌더링
+            if (tabId === 'charts-tab') {
+                renderCharts();
+            }
+        }
+        
+        // 관리자 비밀번호 확인
+        function checkAdminPassword() {
+            const password = document.getElementById('admin-password').value;
+            if (password === ADMIN_PASSWORD) {
+                document.getElementById('admin-content').classList.remove('hidden');
+                renderAdminData();
+            } else {
+                alert('비밀번호가 일치하지 않습니다.');
+            }
+        }
+        
+        // 관리자 데이터 렌더링
+        function renderAdminData() {
+            renderSummaryTable();
+            renderDetailsTable();
+            renderCharts();
+        }
+        
+        // 요약 테이블 렌더링
+        function renderSummaryTable() {
+            const tableBody = document.getElementById('summary-table-body');
+            tableBody.innerHTML = '';
+            
+            // 팀별 데이터 집계
+            const teamData = processTeamData();
+            
+            // 각 팀에 대한 행 생성
+            for (let i = 1; i <= 8; i++) {
+                if (teamData[i] && teamData[i].evaluatorCount > 0) {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${i}팀</td>
+                        <td>${teamData[i].avgTotal.toFixed(1)}</td>
+                        <td>${teamData[i].avgProblem.toFixed(1)}</td>
+                        <td>${teamData[i].avgAi.toFixed(1)}</td>
+                        <td>${teamData[i].avgFeasibility.toFixed(1)}</td>
+                        <td>${teamData[i].avgDelivery.toFixed(1)}</td>
+                        <td>${teamData[i].evaluatorCount}</td>
+                    `;
+                    tableBody.appendChild(row);
+                }
+            }
+        }
+        
+        // 상세 테이블 렌더링
+        function renderDetailsTable() {
+            const tableBody = document.getElementById('details-table-body');
+            tableBody.innerHTML = '';
+            
+            // 평가 데이터 정렬 (최신순)
+            const sortedEvaluations = [...evaluations].sort((a, b) => 
+                new Date(b.timestamp) - new Date(a.timestamp)
+            );
+            
+            // 각 평가에 대한 행 생성
+            sortedEvaluations.forEach(eval => {
+                const row = document.createElement('tr');
+                row.dataset.team = eval.evaluatedTeam; // 필터링용 데이터 속성
+                
+                const date = new Date(eval.timestamp);
+                row.innerHTML = `
+                    <td>${formatDate(date)}</td>
+                    <td>${eval.evaluatorTeam}팀</td>
+                    <td>${eval.evaluatedTeam}팀</td>
+                    <td>${eval.totalScore}</td>
+                    <td>${eval.categoryScores.problem}</td>
+                    <td>${eval.categoryScores.ai}</td>
+                    <td>${eval.categoryScores.feasibility}</td>
+                    <td>${eval.categoryScores.delivery}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+        
+        // 팀별 데이터 처리
+        function processTeamData() {
+            const teamData = {};
+            
+            // 팀 데이터 초기화
+            for (let i = 1; i <= 8; i++) {
+                teamData[i] = {
+                    totalScores: [],
+                    problemScores: [],
+                    aiScores: [],
+                    feasibilityScores: [],
+                    deliveryScores: [],
+                    evaluators: new Set()
+                };
+            }
+            
+            // 평가 데이터 집계
+            evaluations.forEach(eval => {
+                const team = eval.evaluatedTeam;
+                
+                teamData[team].totalScores.push(eval.totalScore);
+                teamData[team].problemScores.push(eval.categoryScores.problem);
+                teamData[team].aiScores.push(eval.categoryScores.ai);
+                teamData[team].feasibilityScores.push(eval.categoryScores.feasibility);
+                teamData[team].deliveryScores.push(eval.categoryScores.delivery);
+                teamData[team].evaluators.add(eval.evaluatorTeam);
+            });
+            
+            // 평균 계산
+            for (const team in teamData) {
+                if (teamData[team].totalScores.length > 0) {
+                    teamData[team].avgTotal = average(teamData[team].totalScores);
+                    teamData[team].avgProblem = average(teamData[team].problemScores);
+                    teamData[team].avgAi = average(teamData[team].aiScores);
+                    teamData[team].avgFeasibility = average(teamData[team].feasibilityScores);
+                    teamData[team].avgDelivery = average(teamData[team].deliveryScores);
+                    teamData[team].evaluatorCount = teamData[team].evaluators.size;
+                }
+            }
+            
+            return teamData;
+        }
+        
+        // 평균 계산 함수
+        function average(arr) {
+            if (arr.length === 0) return 0;
+            return arr.reduce((a, b) => a + b, 0) / arr.length;
+        }
+        
+        // 날짜 포맷 함수
+        function formatDate(date) {
+            return `${date.getFullYear()}-${padZero(date.getMonth() + 1)}-${padZero(date.getDate())} ${padZero(date.getHours())}:${padZero(date.getMinutes())}`;
+        }
+        
+        // 숫자 앞에 0 채우기
+        function padZero(num) {
+            return num.toString().padStart(2, '0');
+        }
+        
+        // 팀별 필터링
+        function filterEvaluations() {
+            const filterValue = document.getElementById('filter-team').value;
+            const rows = document.querySelectorAll('#details-table-body tr');
+            
+            rows.forEach(row => {
+                if (filterValue === 'all' || row.dataset.team === filterValue) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+        
+        // 차트 렌더링
+        function renderCharts() {
+            const teamData = processTeamData();
+            
+            // 총점 차트
+            renderTotalScoreChart(teamData);
+            
+            // 카테고리별 점수 차트
+            renderCategoryScoreChart(teamData);
+        }
+        
+        // 총점 차트 렌더링
+        function renderTotalScoreChart(teamData) {
+            const ctx = document.getElementById('total-score-chart').getContext('2d');
+            
+            // 기존 차트 제거
+            if (window.totalScoreChart) {
+                window.totalScoreChart.destroy();
+            }
+            
+            const labels = [];
+            const data = [];
+            
+            for (let i = 1; i <= 8; i++) {
+                if (teamData[i] && teamData[i].evaluatorCount > 0) {
+                    labels.push(`${i}팀`);
+                    data.push(teamData[i].avgTotal);
+                }
+            }
+            
+            window.totalScoreChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: '평균 총점',
+                        data: data,
+                        backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100
+                        }
+                    },
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: '팀별 평균 총점'
+                        }
+                    }
+                }
+            });
+        }
+        
+        // 카테고리별 점수 차트 렌더링
+        function renderCategoryScoreChart(teamData) {
+            const ctx = document.getElementById('category-score-chart').getContext('2d');
+            
+            // 기존 차트 제거
+            if (window.categoryScoreChart) {
+                window.categoryScoreChart.destroy();
+            }
+            
+            const datasets = [];
+            const colors = [
+                'rgba(255, 99, 132, 0.7)',
+                'rgba(54, 162, 235, 0.7)',
+                'rgba(255, 206, 86, 0.7)',
+                'rgba(75, 192, 192, 0.7)',
+                'rgba(153, 102, 255, 0.7)',
+                'rgba(255, 159, 64, 0.7)',
+                'rgba(199, 199, 199, 0.7)',
+                'rgba(83, 102, 255, 0.7)'
+            ];
+            
+            let i = 0;
+            for (let team = 1; team <= 8; team++) {
+                if (teamData[team] && teamData[team].evaluatorCount > 0) {
+                    datasets.push({
+                        label: `${team}팀`,
+                        data: [
+                            teamData[team].avgProblem,
+                            teamData[team].avgAi,
+                            teamData[team].avgFeasibility,
+                            teamData[team].avgDelivery
+                        ],
+                        backgroundColor: colors[i % colors.length],
+                        borderColor: colors[i % colors.length].replace('0.7', '1'),
+                        borderWidth: 1
+                    });
+                    i++;
+                }
+            }
+            
+            window.categoryScoreChart = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['문제 정의 (30점)', 'AI 혁신성 (20점)', '실현 가능성 (30점)', '전달력 (20점)'],
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        r: {
+                            beginAtZero: true,
+                            max: 30
+                        }
+                    },
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: '팀별 카테고리 점수'
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
